@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:conte="http://www.springframework.org/schema/c"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <context:component-scan base-package="cn.netctoss" annotation-config="true"/>
+    <aop:aspectj-autoproxy/>
+    <!-- 视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <!-- 前缀 -->
+    <property value="/WEB-INF/" name="prefix"/>
+    <!-- 后缀 -->
+    <property value=".jsp" name="suffix"/>
+</bean>
+
+    <!-- 读db.properties配置 -->
+<!--    <util:properties id="dbConfig" location="classpath:db.properties"/>-->
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="order" value="2"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:db.properties</value>
+            </list>
+        </property>
+        <property name="fileEncoding" value="utf-8"/>
+    </bean>
+
+
+    <!-- 配置数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <!-- 连接池启动时的初始值 -->
+        <property name="initialSize" value="${initialSize}"/>
+        <!-- 连接池的最大值 -->
+        <property name="maxActive" value="${maxActive}"/>
+    </bean>
+
+<!--    <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">-->
+<!--        <property value="#{dbConfig.url}" name="url"/>-->
+<!--        <property value="#{dbConfig.driver}" name="driverClassName"/>-->
+<!--        <property value="#{dbConfig.username}" name="username"/>-->
+<!--        <property value="#{dbConfig.password}" name="password"/>-->
+<!--        <property value="#{dbConfig.initialSize}" name="initialSize"/>-->
+<!--        <property value="#{dbConfig.maxActive}" name="maxActive"/>-->
+<!--    </bean>-->
+        <!-- MapperScannerConfigurer -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property value="cn.netctoss.dao" name="basePackage"/>
+    </bean>
+    <!-- SqlSessionFactoryBean -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- XML文件在哪里 -->
+        <property value="classpath:mappers/*Mapper.xml" name="mapperLocations"/>
+        <!-- 用哪个数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>
